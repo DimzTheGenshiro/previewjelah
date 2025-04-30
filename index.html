@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Digital Auto Shop</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: white;
+      text-align: center;
+    }
+    header {
+      padding: 40px 20px 20px;
+    }
+    header img {
+      width: 100px;
+      border-radius: 20px;
+    }
+    header h1 {
+      margin-top: 10px;
+      font-size: 32px;
+    }
+    .product {
+      background: rgba(255,255,255,0.1);
+      margin: 20px auto;
+      padding: 20px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .product img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .product h2 {
+      margin: 10px 0;
+    }
+    footer {
+      margin-top: 40px;
+      padding: 20px;
+      background: rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://via.placeholder.com/100" alt="Logo Toko">
+    <h1>My Digital Auto Shop</h1>
+    <p>Instant Delivery | Secure Payment | Global Access</p>
+  </header>
+
+  <div class="product">
+    <img src="https://via.placeholder.com/400x200" alt="Product">
+    <h2>Auto Bot Script</h2>
+    <p>Automation bot for selling, with instant delivery system.</p>
+    <div id="paypal-button-container"></div>
+  </div>
+
+  <footer>
+    &copy; 2025 - All rights reserved | Email: dimzmang@gmail.com
+  </footer>
+
+  <script src="https://www.paypal.com/sdk/js?client-id=Ae2UJcfqNOymRYYKMYnE17sXEXBaW8tJF_NZ3M5huk1DREqaMHG_53DcgtePpGv-KXvSBNPxkTfJzboY&currency=USD"></script>
+  <script>
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: '10.00'
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert('Thanks, ' + details.payer.name.given_name + '! Your product will be sent to your email.');
+          // Kamu bisa tambahkan AJAX fetch di sini untuk kirim data ke backend/mailer
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+</body>
+</html>
