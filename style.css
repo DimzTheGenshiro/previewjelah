@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+  color: white;
+  text-align: center;
+}
+header {
+  padding: 40px 20px;
+}
+header img {
+  width: 100px;
+  border-radius: 20px;
+}
+.product {
+  background: rgba(255,255,255,0.05);
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  backdrop-filter: blur(5px);
+}
+.product img {
+  width: 100%;
+  border-radius: 10px;
+}
+footer {
+  margin-top: 40px;
+  padding: 20px;
+  background: rgba(0,0,0,0.2);
+}
