@@ -7,10 +7,15 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
       color: white;
       text-align: center;
+      animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
     }
     header {
       padding: 40px 20px 20px;
@@ -18,30 +23,65 @@
     header img {
       width: 100px;
       border-radius: 20px;
+      transition: transform 0.3s ease;
+    }
+    header img:hover {
+      transform: scale(1.05);
     }
     header h1 {
       margin-top: 10px;
       font-size: 32px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .product {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
       margin: 20px auto;
       padding: 20px;
       border-radius: 20px;
       width: 90%;
       max-width: 400px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+    .product:hover {
+      transform: scale(1.01);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.4);
     }
     .product img {
       width: 100%;
       border-radius: 10px;
+      transition: transform 0.3s ease;
+    }
+    .product img:hover {
+      transform: scale(1.02);
     }
     .product h2 {
       margin: 10px 0;
     }
+    .buy-btn {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 10px 20px;
+      background: #00c6ff;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .buy-btn:hover {
+      background: #0072ff;
+    }
     footer {
       margin-top: 40px;
       padding: 20px;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 14px;
     }
   </style>
 </head>
@@ -57,6 +97,8 @@
     <h2>Auto Bot Script</h2>
     <p>Automation bot for selling, with instant delivery system.</p>
     <div id="paypal-button-container"></div>
+    <br>
+    <a href="#" class="buy-btn">Buy Now</a>
   </div>
 
   <footer>
@@ -78,7 +120,6 @@
       onApprove: function(data, actions) {
         return actions.order.capture().then(function(details) {
           alert('Thanks, ' + details.payer.name.given_name + '! Your product will be sent to your email.');
-          // Kamu bisa tambahkan AJAX fetch di sini untuk kirim data ke backend/mailer
         });
       }
     }).render('#paypal-button-container');
