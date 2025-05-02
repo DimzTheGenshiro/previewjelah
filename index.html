@@ -1,0 +1,475 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   AutomationBot
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+ </head>
+ <body class="bg-gray-50 min-h-screen flex flex-col">
+  <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-md shadow-md">
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+    <a class="text-2xl font-extrabold text-indigo-700 tracking-wide select-none" href="#">
+     AutomationBot
+    </a>
+    <nav class="hidden md:flex space-x-10 text-gray-700 font-semibold">
+     <a class="hover:text-indigo-600 transition duration-300 ease-in-out" href="#products">
+      Products
+     </a>
+     <a class="hover:text-indigo-600 transition duration-300 ease-in-out flex items-center" href="#cart">
+      <i class="fas fa-shopping-cart mr-1">
+      </i>
+      Cart
+      <span class="ml-1 bg-indigo-600 text-white rounded-full px-2 text-xs font-bold" id="cart-count">
+       0
+      </span>
+     </a>
+     <a class="hover:text-indigo-600 transition duration-300 ease-in-out" href="#testimonials">
+      Testimonials
+     </a>
+     <a class="hover:text-indigo-600 transition duration-300 ease-in-out" href="#contact">
+      Contact
+     </a>
+    </nav>
+    <button aria-label="Toggle mobile menu" class="md:hidden focus:outline-none" id="mobile-menu-button">
+     <i class="fas fa-bars text-2xl text-gray-700">
+     </i>
+    </button>
+   </div>
+   <div class="md:hidden hidden bg-white/90 backdrop-blur-md border-t border-gray-200" id="mobile-menu">
+    <a class="block px-4 py-3 text-gray-700 font-semibold hover:bg-indigo-50 transition" href="#products">
+     Products
+    </a>
+    <a class="block px-4 py-3 text-gray-700 font-semibold hover:bg-indigo-50 transition flex items-center" href="#cart">
+     <i class="fas fa-shopping-cart mr-2">
+     </i>
+     Cart
+     <span class="ml-2 bg-indigo-600 text-white rounded-full px-2 text-xs font-bold" id="cart-count-mobile">
+      0
+     </span>
+    </a>
+    <a class="block px-4 py-3 text-gray-700 font-semibold hover:bg-indigo-50 transition" href="#testimonials">
+     Testimonials
+    </a>
+    <a class="block px-4 py-3 text-gray-700 font-semibold hover:bg-indigo-50 transition" href="#contact">
+     Contact
+    </a>
+   </div>
+  </header>
+  <section aria-label="Image slider" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-10 relative overflow-hidden">
+  <div id="slider" class="flex transition-transform duration-700 ease-in-out">
+    <img src="https://storage.googleapis.com/a1aa/image/858b6b57-f290-439c-4769-d802df84e288.jpg" alt="1" class="min-w-full aspect-[19/6] object-cover rounded-lg shadow-lg" />
+    <img src="https://storage.googleapis.com/a1aa/image/26a51686-2bde-4d1b-353b-ad07ae6b9ea3.jpg" alt="2" class="min-w-full aspect-[19/6] object-cover rounded-lg shadow-lg" />
+    <img src="https://storage.googleapis.com/a1aa/image/cf4752d6-83f1-4ccd-3bd1-d5c54fc9122f.jpg" alt="3" class="min-w-full aspect-[19/6] object-cover rounded-lg shadow-lg" />
+  </div>
+</section>
+<script>
+  const slider = document.getElementById("slider");
+  const slides = slider.children;
+  const totalSlides = slides.length;
+  let currentIndex = 0;
+
+  function moveToSlide(index) {
+    slider.style.transform = `translateX(-${index * 100}%)`;
+  }
+
+  setInterval(() => {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    moveToSlide(currentIndex);
+  }, 4000);
+</script>
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+   <section class="mb-12 text-center">
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
+     Discover Premium Digital Products
+    </h1>
+    <p class="text-gray-600 max-w-2xl mx-auto text-lg">
+     Browse, select, and purchase high-quality digital products with seamless payment integration.
+    </p>
+   </section>
+   <section class="mb-16" id="products">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+     <h2 class="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">
+      Products
+     </h2>
+     <div class="flex flex-wrap gap-3 items-center">
+      <select aria-label="Filter by category" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="filter-category">
+       <option value="all">
+        All Categories
+       </option>
+       <option value="script">
+        Script
+       </option>
+       <option value="website">
+        Website
+       </option>
+       <option value="others">
+        Others
+       </option>
+      </select>
+      <select aria-label="Sort products" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" id="filter-sort">
+       <option value="popularity">
+        Sort by Popularity
+       </option>
+       <option value="price-asc">
+        Sort by Price: Low to High
+       </option>
+       <option value="price-desc">
+        Sort by Price: High to Low
+       </option>
+      </select>
+     </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="products-grid">
+    </div>
+   </section>
+   <section class="mb-16" id="cart">
+    <h2 class="text-3xl font-bold text-gray-900 mb-6">
+     Shopping Cart
+    </h2>
+    <div class="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto" id="cart-container">
+     <div class="divide-y divide-gray-200 max-h-96 overflow-y-auto" id="cart-items">
+      <p class="text-gray-500 text-center py-10" id="empty-cart-text">
+       Your cart is empty.
+      </p>
+     </div>
+     <div class="mt-6 hidden" id="cart-summary">
+      <div class="flex justify-between text-lg font-semibold text-gray-900 mb-4">
+       <span>
+        Total:
+       </span>
+       <span id="cart-total">
+        $0
+       </span>
+      </div>
+      <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-md transition focus:outline-none focus:ring-2 focus:ring-indigo-500" disabled="" id="checkout-button">
+       Proceed to Payment
+      </button>
+     </div>
+    </div>
+   </section>
+   <section class="mb-16 max-w-4xl mx-auto" id="testimonials">
+    <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+     Testimonials
+    </h2>
+    <div class="space-y-8">
+     <article class="bg-white rounded-lg shadow p-6">
+      <p class="text-gray-700 italic mb-4">
+       "AutomationBot has transformed the way I manage my digital products. The seamless integration and user-friendly interface make it a must-have tool!"
+      </p>
+      <div class="flex items-center space-x-4">
+       <img alt="Portrait of a smiling young woman with short hair and glasses, representing a satisfied AutomationBot user" class="w-16 h-16 rounded-full object-cover" height="64" src="https://storage.googleapis.com/a1aa/image/248a3c10-cb50-4776-5e5e-8f9d6c522433.jpg" width="64"/>
+       <div>
+        <p class="font-semibold text-gray-900">
+         Sarah Johnson
+        </p>
+        <a class="text-indigo-600 hover:underline text-sm" href="https://example.com/testimonial1" rel="noopener noreferrer" target="_blank">
+         Read more
+        </a>
+       </div>
+      </div>
+     </article>
+     <article class="bg-white rounded-lg shadow p-6">
+      <p class="text-gray-700 italic mb-4">
+       "The product selection and checkout process are incredibly smooth. I highly recommend AutomationBot for anyone looking to buy digital products."
+      </p>
+      <div class="flex items-center space-x-4">
+       <img alt="Portrait of a middle-aged man with beard and glasses, smiling confidently, representing a happy AutomationBot customer" class="w-16 h-16 rounded-full object-cover" height="64" src="https://storage.googleapis.com/a1aa/image/7e16d3ae-bfb8-44cc-15aa-48570200961c.jpg" width="64"/>
+       <div>
+        <p class="font-semibold text-gray-900">
+         Michael Lee
+        </p>
+        <a class="text-indigo-600 hover:underline text-sm" href="https://example.com/testimonial2" rel="noopener noreferrer" target="_blank">
+         Read more
+        </a>
+       </div>
+      </div>
+     </article>
+     <article class="bg-white rounded-lg shadow p-6">
+      <p class="text-gray-700 italic mb-4">
+       "Excellent customer support and a fantastic range of products. AutomationBot is my go-to platform for digital purchases."
+      </p>
+      <div class="flex items-center space-x-4">
+       <img alt="Portrait of a smiling young man with short hair and casual attire, representing a satisfied AutomationBot user" class="w-16 h-16 rounded-full object-cover" height="64" src="https://storage.googleapis.com/a1aa/image/0195c8a7-e7b4-452d-61d5-25e22b5f3796.jpg" width="64"/>
+       <div>
+        <p class="font-semibold text-gray-900">
+         Emily Davis
+        </p>
+        <a class="text-indigo-600 hover:underline text-sm" href="https://example.com/testimonial3" rel="noopener noreferrer" target="_blank">
+         Read more
+        </a>
+       </div>
+      </div>
+     </article>
+    </div>
+   </section>
+   <section class="mb-16 max-w-4xl mx-auto bg-white rounded-lg shadow p-8" id="contact">
+    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">
+     Contact Us
+    </h2>
+    <div class="space-y-6 text-gray-700 text-lg">
+     <div class="flex items-center space-x-4">
+      <i class="fab fa-whatsapp text-green-500 text-3xl">
+      </i>
+      <a class="hover:underline" href="https://wa.me/62882015566643" rel="noopener noreferrer" target="_blank">
+       WhatsApp: +62 882 0155 66643
+      </a>
+     </div>
+     <div class="flex items-center space-x-4">
+      <i class="fas fa-envelope text-indigo-600 text-3xl">
+      </i>
+      <a class="hover:underline" href="mailto:dimzmang@email.com">
+       dimzmang@email.com
+      </a>
+     </div>
+    </div>
+   </section>
+  </main>
+  <footer class="bg-white border-t border-gray-200 py-6 mt-auto">
+   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm select-none">
+    © 2024 AutomationBot. All rights reserved.
+   </div>
+  </footer>
+  <script>
+   // Sample product data with shoppy.gg links
+    const products = [
+      {
+        id: 1,
+        title: "tester",
+        description: "galow",
+        category: "script",
+        price: 10,
+        popularity: 2550,
+        image: "https://placehold.co/600x400/png?text=fsgags",
+        alt: "Cover of Mastering React Ebook showing a modern React logo with digital book background",
+        shoppyLink: "https://shoppy.gg/product/react-ebook"
+      },
+      {
+        id: 2,
+        title: "Website Portofolio",
+        description: "suitable for you to introduce your business",
+        category: "website",
+        price: 20,
+        popularity: 69,
+        image: "https://files.catbox.moe/btk7j5.png",
+        alt: "Screenshot of Next.js starter template dashboard with clean UI",
+        shoppyLink: "https://shoppy.gg/product/M7sh8tl"
+      },
+      {
+        id: 3,
+        title: "haldhdb",
+        description: "nuansbhshsll",
+        category: "others",
+        price: 27,
+        popularity: 2727,
+        image: "https://placehold.co/600x400/png?text=ansnsnnssn",
+        alt: "Illustration of a person learning JavaScript on a laptop with code snippets",
+        shoppyLink: "https://shoppy.gg/product/js-course"
+      }
+    ];
+
+    // Cart state
+    let cart = [];
+
+    // DOM elements
+    const productsGrid = document.getElementById("products-grid");
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cartTotalEl = document.getElementById("cart-total");
+    const cartCountEl = document.getElementById("cart-count");
+    const cartCountMobileEl = document.getElementById("cart-count-mobile");
+    const cartSummary = document.getElementById("cart-summary");
+    const emptyCartText = document.getElementById("empty-cart-text");
+    const checkoutButton = document.getElementById("checkout-button");
+    const filterCategory = document.getElementById("filter-category");
+    const filterSort = document.getElementById("filter-sort");
+    const mobileMenuButton = document.getElementById("mobile-menu-button");
+    const mobileMenu = document.getElementById("mobile-menu");
+
+    // Format price to USD currency
+    function formatPrice(price) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
+    }
+
+    // Render products based on filters
+    function renderProducts() {
+      let filteredProducts = [...products];
+
+      // Filter by category
+      const category = filterCategory.value;
+      if (category !== "all") {
+        filteredProducts = filteredProducts.filter(p => p.category === category);
+      }
+
+      // Sort products
+      const sort = filterSort.value;
+      if (sort === "price-asc") {
+        filteredProducts.sort((a, b) => a.price - b.price);
+      } else if (sort === "price-desc") {
+        filteredProducts.sort((a, b) => b.price - a.price);
+      } else if (sort === "popularity") {
+        filteredProducts.sort((a, b) => b.popularity - a.popularity);
+      }
+
+      productsGrid.innerHTML = "";
+
+      filteredProducts.forEach(product => {
+        const productCard = document.createElement("article");
+        productCard.className = "bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden flex flex-col";
+
+        productCard.innerHTML = `
+          <img src="${product.image}" alt="${product.alt}" class="w-full h-48 object-cover" loading="lazy" />
+          <div class="p-4 flex flex-col flex-grow">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">${product.title}</h3>
+            <p class="text-gray-600 flex-grow">${product.description}</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="text-indigo-600 font-bold text-lg">${formatPrice(product.price)}</span>
+              <button data-id="${product.id}" class="add-to-cart-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md transition focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <i class="fas fa-cart-plus mr-2"></i> Add to Cart
+              </button>
+            </div>
+          </div>
+        `;
+
+        productsGrid.appendChild(productCard);
+      });
+
+      // Attach event listeners to add to cart buttons
+      document.querySelectorAll(".add-to-cart-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const productId = parseInt(button.getAttribute("data-id"));
+          addToCart(productId);
+        });
+      });
+    }
+
+    // Add product to cart
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const cartItem = cart.find(item => item.id === productId);
+      if (cartItem) {
+        cartItem.quantity++;
+      } else {
+        cart.push({ ...product, quantity: 1 });
+      }
+      updateCartUI();
+    }
+
+    // Remove product from cart
+    function removeFromCart(productId) {
+      cart = cart.filter(item => item.id !== productId);
+      updateCartUI();
+    }
+
+    // Update quantity in cart
+    function updateQuantity(productId, quantity) {
+      if (quantity < 1) return;
+      const cartItem = cart.find(item => item.id === productId);
+      if (cartItem) {
+        cartItem.quantity = quantity;
+        updateCartUI();
+      }
+    }
+
+    // Update cart UI
+    function updateCartUI() {
+      if (cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p class="text-gray-500 text-center py-10">Your cart is empty.</p>';
+        cartSummary.classList.add("hidden");
+        checkoutButton.disabled = true;
+      } else {
+        cartItemsContainer.innerHTML = "";
+        cart.forEach(item => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "flex items-center py-4";
+
+          itemEl.innerHTML = `
+            <img src="${item.image}" alt="${item.alt}" class="w-20 h-20 object-cover rounded-md mr-4 flex-shrink-0" />
+            <div class="flex-grow">
+              <h4 class="font-semibold text-gray-900">${item.title}</h4>
+              <p class="text-gray-600">${formatPrice(item.price)} x ${item.quantity} = <span class="font-bold">${formatPrice(item.price * item.quantity)}</span></p>
+              <div class="mt-2 flex items-center space-x-2">
+                <label for="qty-${item.id}" class="sr-only">Quantity</label>
+                <input type="number" id="qty-${item.id}" min="1" value="${item.quantity}" class="w-16 border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <button data-id="${item.id}" class="remove-from-cart text-red-600 hover:text-red-800 focus:outline-none" aria-label="Remove ${item.title} from cart">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          `;
+
+          cartItemsContainer.appendChild(itemEl);
+
+          // Quantity input event
+          const qtyInput = itemEl.querySelector(`#qty-${item.id}`);
+          qtyInput.addEventListener("change", (e) => {
+            const val = parseInt(e.target.value);
+            if (isNaN(val) || val < 1) {
+              e.target.value = item.quantity;
+              return;
+            }
+            updateQuantity(item.id, val);
+          });
+
+          // Remove button event
+          const removeBtn = itemEl.querySelector(".remove-from-cart");
+          removeBtn.addEventListener("click", () => {
+            removeFromCart(item.id);
+          });
+        });
+
+        cartSummary.classList.remove("hidden");
+        checkoutButton.disabled = false;
+      }
+
+      // Update total price
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      cartTotalEl.textContent = formatPrice(total);
+
+      // Update cart count badges
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCountEl.textContent = totalItems;
+      cartCountMobileEl.textContent = totalItems;
+    }
+
+    // Checkout button click handler
+    checkoutButton.addEventListener("click", () => {
+      if (cart.length === 0) return;
+
+      cart.forEach(item => {
+        for (let i = 0; i < item.quantity; i++) {
+          window.open(item.shoppyLink, "_blank", "noopener,noreferrer");
+        }
+      });
+
+      alert("You have been redirected to the payment pages for your products. After payment, please follow the instructions on shoppy.gg to download your products.");
+
+      cart = [];
+      updateCartUI();
+    });
+
+    // Filter change events
+    filterCategory.addEventListener("change", renderProducts);
+    filterSort.addEventListener("change", renderProducts);
+
+    // Mobile menu toggle
+    mobileMenuButton.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // Initial render
+    renderProducts();
+    updateCartUI();
+  </script>
+ </body>
+</html>
