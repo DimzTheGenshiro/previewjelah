@@ -1,0 +1,721 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cross-Platform Notes App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    /* Scrollbar for notes list */
+    .notes-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    .notes-list::-webkit-scrollbar-thumb {
+      background-color: #a0aec0;
+      border-radius: 4px;
+    }
+    .notes-list::-webkit-scrollbar-track {
+      background-color: #edf2f7;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+  <div id="root" class="flex-grow flex flex-col"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useRef } = React;
+
+    // Utility functions
+    function generateId() {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    // LocalStorage keys
+    const STORAGE_KEY = 'notesAppData';
+    const PASSWORD_KEY = 'notesAppPassword';
+
+    // Default categories and tags
+    const defaultCategories = ['Personal', 'Work', 'Ideas', 'Others'];
+    const defaultTags = ['Important', 'Urgent', 'Later', 'Review'];
+
+    // Authentication Component
+    function Auth({ onAuthSuccess }) {
+      const [password, setPassword] = useState('');
+      const [mode, setMode] = useState('login'); // login or set
+      const [error, setError] = useState('');
+
+      useEffect(() => {
+        const savedPassword = localStorage.getItem(PASSWORD_KEY);
+        if (!savedPassword) {
+          setMode('set');
+        }
+      }, []);
+
+      function handleSubmit(e) {
+        e.preventDefault();
+        const savedPassword = localStorage.getItem(PASSWORD_KEY);
+        if (mode === 'set') {
+          if (password.length < 4) {
+            setError('Password minimal 4 karakter');
+            return;
+          }
+          localStorage.setItem(PASSWORD_KEY, password);
+          setError('');
+          onAuthSuccess();
+        } else {
+          if (password === savedPassword) {
+            setError('');
+            onAuthSuccess();
+          } else {
+            setError('Password salah');
+          }
+        }
+      }
+
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-indigo-500 to-purple-600 px-4">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md"
+            aria-label={mode === 'set' ? 'Set Password Form' : 'Login Form'}
+          >
+            <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">
+              {mode === 'set' ? 'Set Password' : 'Login'}
+            </h2>
+            <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              autoComplete="current-password"
+              aria-required="true"
+              aria-describedby="passwordHelp"
+            />
+            <p id="passwordHelp" className="text-sm text-gray-500 mt-1 mb-4">
+              {mode === 'set'
+                ? 'Buat password untuk mengamankan catatan Anda.'
+                : 'Masukkan password untuk mengakses catatan Anda.'}
+            </p>
+            {error && <p className="text-red-600 mb-4" role="alert">{error}</p>}
+            <button
+              type="submit"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              {mode === 'set' ? 'Set Password' : 'Login'}
+            </button>
+            {mode === 'login' && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('set');
+                  setPassword('');
+                  setError('');
+                }}
+                className="mt-4 w-full text-indigo-600 hover:text-indigo-800 font-medium"
+              >
+                Reset Password
+              </button>
+            )}
+          </form>
+        </div>
+      );
+    }
+
+    // Note Editor Component
+    function NoteEditor({
+      note,
+      onSave,
+      onCancel,
+      categories,
+      tags,
+      onAddCategory,
+      onAddTag,
+    }) {
+      const [title, setTitle] = useState(note?.title || '');
+      const [content, setContent] = useState(note?.content || '');
+      const [category, setCategory] = useState(note?.category || '');
+      const [noteTags, setNoteTags] = useState(note?.tags || []);
+      const [newCategory, setNewCategory] = useState('');
+      const [newTag, setNewTag] = useState('');
+      const [error, setError] = useState('');
+
+      function toggleTag(tag) {
+        if (noteTags.includes(tag)) {
+          setNoteTags(noteTags.filter((t) => t !== tag));
+        } else {
+          setNoteTags([...noteTags, tag]);
+        }
+      }
+
+      function handleSave() {
+        if (!title.trim()) {
+          setError('Judul catatan wajib diisi');
+          return;
+        }
+        onSave({
+          ...note,
+          title: title.trim(),
+          content,
+          category,
+          tags: noteTags,
+          updatedAt: new Date().toISOString(),
+          createdAt: note?.createdAt || new Date().toISOString(),
+        });
+      }
+
+      function handleAddCategory() {
+        const cat = newCategory.trim();
+        if (cat && !categories.includes(cat)) {
+          onAddCategory(cat);
+          setCategory(cat);
+          setNewCategory('');
+        }
+      }
+
+      function handleAddTag() {
+        const tg = newTag.trim();
+        if (tg && !tags.includes(tg)) {
+          onAddTag(tg);
+          setNoteTags([...noteTags, tg]);
+          setNewTag('');
+        }
+      }
+
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 flex flex-col">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+              {note ? 'Edit Catatan' : 'Catatan Baru'}
+            </h3>
+            {error && (
+              <p className="text-red-600 mb-4" role="alert">
+                {error}
+              </p>
+            )}
+            <label className="block mb-2 font-medium text-gray-700" htmlFor="note-title">
+              Judul
+            </label>
+            <input
+              id="note-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Judul catatan"
+              aria-required="true"
+            />
+            <label className="block mb-2 font-medium text-gray-700" htmlFor="note-content">
+              Isi Catatan
+            </label>
+            <textarea
+              id="note-content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows="6"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 resize-y focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Tulis catatan Anda di sini..."
+            ></textarea>
+            <div className="flex flex-col md:flex-row md:space-x-6 mb-4">
+              <div className="flex-1 mb-4 md:mb-0">
+                <label className="block mb-2 font-medium text-gray-700" htmlFor="note-category">
+                  Kategori
+                </label>
+                <select
+                  id="note-category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="">Pilih kategori</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+                <div className="mt-2 flex space-x-2">
+                  <input
+                    type="text"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    placeholder="Tambah kategori baru"
+                    className="flex-grow border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Tambah kategori baru"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Tambah kategori"
+                  >
+                    <i className="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1">
+                <label className="block mb-2 font-medium text-gray-700">Tag</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className={`px-3 py-1 rounded-full border ${
+                        noteTags.includes(tag)
+                          ? 'bg-indigo-600 text-white border-indigo-600'
+                          : 'bg-gray-200 text-gray-700 border-gray-300'
+                      } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                      aria-pressed={noteTags.includes(tag)}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    placeholder="Tambah tag baru"
+                    className="flex-grow border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Tambah tag baru"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddTag}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Tambah tag"
+                  >
+                    <i className="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-4 mt-auto pt-4 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={onCancel}
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Note Item Component
+    function NoteItem({ note, onEdit, onDelete, onDragStart, onDragOver, onDrop, draggable }) {
+      return (
+        <div
+          draggable={draggable}
+          onDragStart={(e) => onDragStart(e, note.id)}
+          onDragOver={(e) => onDragOver(e)}
+          onDrop={(e) => onDrop(e, note.id)}
+          className="bg-white rounded-lg shadow p-4 cursor-move flex flex-col justify-between hover:shadow-md transition-shadow"
+          aria-label={`Catatan: ${note.title}`}
+          tabIndex="0"
+        >
+          <div>
+            <h4 className="font-semibold text-lg text-gray-800 truncate">{note.title}</h4>
+            <p className="text-gray-600 text-sm mt-1 line-clamp-3 whitespace-pre-wrap">{note.content}</p>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-gray-500">
+            <div className="flex flex-wrap gap-1 max-w-[70%]">
+              {note.category && (
+                <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                  {note.category}
+                </span>
+              )}
+              {note.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => onEdit(note)}
+                aria-label={`Edit catatan ${note.title}`}
+                className="text-indigo-600 hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+              >
+                <i className="fas fa-edit"></i>
+              </button>
+              <button
+                onClick={() => onDelete(note.id)}
+                aria-label={`Hapus catatan ${note.title}`}
+                className="text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 rounded"
+              >
+                <i className="fas fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Integration Panel Component
+    function IntegrationPanel({ onClose }) {
+      // For demo, we simulate integration with calendar and task manager
+      return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 flex flex-col">
+            <h3 className="text-xl font-semibold mb-4 text-gray-800">Integrasi Aplikasi</h3>
+            <p className="mb-4 text-gray-700">
+              Integrasi dengan aplikasi lain memungkinkan Anda menghubungkan catatan dengan kalender dan task manager.
+            </p>
+            <div className="space-y-4 flex-grow overflow-y-auto">
+              <div className="border border-gray-300 rounded-md p-4">
+                <h4 className="font-semibold text-lg mb-2">Kalender</h4>
+                <p className="text-gray-600 mb-2">
+                  Sinkronisasi catatan dengan kalender untuk mengatur pengingat dan jadwal.
+                </p>
+                <button
+                  type="button"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  onClick={() => alert('Fitur kalender belum diimplementasikan')}
+                >
+                  Hubungkan Kalender
+                </button>
+              </div>
+              <div className="border border-gray-300 rounded-md p-4">
+                <h4 className="font-semibold text-lg mb-2">Task Manager</h4>
+                <p className="text-gray-600 mb-2">
+                  Integrasi dengan task manager untuk mengelola tugas dari catatan Anda.
+                </p>
+                <button
+                  type="button"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  onClick={() => alert('Fitur task manager belum diimplementasikan')}
+                >
+                  Hubungkan Task Manager
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-end mt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Main App Component
+    function App() {
+      const [authenticated, setAuthenticated] = useState(false);
+      const [notes, setNotes] = useState([]);
+      const [searchTerm, setSearchTerm] = useState('');
+      const [filterCategory, setFilterCategory] = useState('');
+      const [filterTag, setFilterTag] = useState('');
+      const [filterDate, setFilterDate] = useState('');
+      const [editingNote, setEditingNote] = useState(null);
+      const [categories, setCategories] = useState(defaultCategories);
+      const [tags, setTags] = useState(defaultTags);
+      const [showIntegration, setShowIntegration] = useState(false);
+      const [draggedNoteId, setDraggedNoteId] = useState(null);
+
+      // Load notes from localStorage or Firebase (simulate)
+      useEffect(() => {
+        if (!authenticated) return;
+        // Simulate Firebase sync with localStorage for demo
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+          try {
+            const parsed = JSON.parse(savedData);
+            if (Array.isArray(parsed.notes)) {
+              setNotes(parsed.notes);
+            }
+            if (Array.isArray(parsed.categories)) {
+              setCategories(parsed.categories);
+            }
+            if (Array.isArray(parsed.tags)) {
+              setTags(parsed.tags);
+            }
+          } catch {
+            // ignore parse errors
+          }
+        }
+      }, [authenticated]);
+
+      // Save notes to localStorage and simulate Firebase sync
+      useEffect(() => {
+        if (!authenticated) return;
+        const data = { notes, categories, tags };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }, [notes, categories, tags, authenticated]);
+
+      // Filter and search notes
+      const filteredNotes = notes
+        .filter((note) => {
+          if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            if (
+              !note.title.toLowerCase().includes(term) &&
+              !note.content.toLowerCase().includes(term)
+            ) {
+              return false;
+            }
+          }
+          if (filterCategory && note.category !== filterCategory) {
+            return false;
+          }
+          if (filterTag && !note.tags.includes(filterTag)) {
+            return false;
+          }
+          if (filterDate) {
+            const noteDate = new Date(note.createdAt).toISOString().slice(0, 10);
+            if (noteDate !== filterDate) {
+              return false;
+            }
+          }
+          return true;
+        })
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+      // Drag and drop handlers
+      function handleDragStart(e, id) {
+        setDraggedNoteId(id);
+        e.dataTransfer.effectAllowed = 'move';
+      }
+      function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      }
+      function handleDrop(e, id) {
+        e.preventDefault();
+        if (draggedNoteId === null || draggedNoteId === id) return;
+        const draggedIndex = notes.findIndex((n) => n.id === draggedNoteId);
+        const dropIndex = notes.findIndex((n) => n.id === id);
+        if (draggedIndex === -1 || dropIndex === -1) return;
+        const newNotes = [...notes];
+        const [draggedNote] = newNotes.splice(draggedIndex, 1);
+        newNotes.splice(dropIndex, 0, draggedNote);
+        setNotes(newNotes);
+        setDraggedNoteId(null);
+      }
+
+      // Add or update note
+      function saveNote(note) {
+        if (note.id) {
+          setNotes((prev) =>
+            prev.map((n) => (n.id === note.id ? { ...note } : n))
+          );
+        } else {
+          setNotes((prev) => [{ ...note, id: generateId() }, ...prev]);
+        }
+        setEditingNote(null);
+      }
+
+      // Delete note
+      function deleteNote(id) {
+        if (window.confirm('Apakah Anda yakin ingin menghapus catatan ini?')) {
+          setNotes((prev) => prev.filter((n) => n.id !== id));
+        }
+      }
+
+      // Add category
+      function addCategory(cat) {
+        setCategories((prev) => [...prev, cat]);
+      }
+
+      // Add tag
+      function addTag(tg) {
+        setTags((prev) => [...prev, tg]);
+      }
+
+      // Logout (clear auth)
+      function logout() {
+        setAuthenticated(false);
+      }
+
+      return (
+        <>
+          {!authenticated ? (
+            <Auth onAuthSuccess={() => setAuthenticated(true)} />
+          ) : (
+            <div className="flex flex-col h-screen">
+              <header className="bg-indigo-700 text-white flex items-center justify-between px-4 py-3 shadow-md">
+                <h1 className="text-xl font-bold select-none">Aplikasi Catatan</h1>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => setEditingNote({})}
+                    className="bg-indigo-500 hover:bg-indigo-600 px-3 py-1 rounded-md flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-label="Buat catatan baru"
+                  >
+                    <i className="fas fa-plus"></i>
+                    <span className="hidden sm:inline">Catatan Baru</span>
+                  </button>
+                  <button
+                    onClick={() => setShowIntegration(true)}
+                    className="bg-indigo-500 hover:bg-indigo-600 px-3 py-1 rounded-md flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-label="Buka panel integrasi aplikasi"
+                  >
+                    <i className="fas fa-plug"></i>
+                    <span className="hidden sm:inline">Integrasi</span>
+                  </button>
+                  <button
+                    onClick={logout}
+                    className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-label="Logout"
+                  >
+                    <i className="fas fa-sign-out-alt"></i>
+                    <span className="hidden sm:inline">Keluar</span>
+                  </button>
+                </div>
+              </header>
+              <main className="flex flex-col md:flex-row flex-grow overflow-hidden">
+                <aside className="md:w-72 bg-white border-r border-gray-200 flex flex-col p-4 space-y-4 overflow-y-auto">
+                  <div>
+                    <label htmlFor="search" className="block text-gray-700 font-medium mb-1">
+                      Cari Catatan
+                    </label>
+                    <input
+                      id="search"
+                      type="search"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Cari berdasarkan kata kunci..."
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      aria-label="Cari catatan"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="filter-category" className="block text-gray-700 font-medium mb-1">
+                      Filter Kategori
+                    </label>
+                    <select
+                      id="filter-category"
+                      value={filterCategory}
+                      onChange={(e) => setFilterCategory(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      aria-label="Filter berdasarkan kategori"
+                    >
+                      <option value="">Semua Kategori</option>
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="filter-tag" className="block text-gray-700 font-medium mb-1">
+                      Filter Tag
+                    </label>
+                    <select
+                      id="filter-tag"
+                      value={filterTag}
+                      onChange={(e) => setFilterTag(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      aria-label="Filter berdasarkan tag"
+                    >
+                      <option value="">Semua Tag</option>
+                      {tags.map((tag) => (
+                        <option key={tag} value={tag}>
+                          {tag}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="filter-date" className="block text-gray-700 font-medium mb-1">
+                      Filter Tanggal
+                    </label>
+                    <input
+                      id="filter-date"
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      aria-label="Filter berdasarkan tanggal"
+                    />
+                    {filterDate && (
+                      <button
+                        type="button"
+                        onClick={() => setFilterDate('')}
+                        className="mt-1 text-indigo-600 hover:text-indigo-800 text-sm focus:outline-none focus:underline"
+                      >
+                        Hapus filter tanggal
+                      </button>
+                    )}
+                  </div>
+                </aside>
+                <section className="flex-grow p-4 overflow-y-auto notes-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {filteredNotes.length === 0 ? (
+                    <p className="text-gray-500 col-span-full text-center mt-20 select-none">
+                      Tidak ada catatan ditemukan.
+                    </p>
+                  ) : (
+                    filteredNotes.map((note) => (
+                      <NoteItem
+                        key={note.id}
+                        note={note}
+                        onEdit={setEditingNote}
+                        onDelete={deleteNote}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onDrop={handleDrop}
+                        draggable={true}
+                      />
+                    ))
+                  )}
+                </section>
+              </main>
+              {editingNote !== null && (
+                <NoteEditor
+                  note={editingNote.id ? editingNote : null}
+                  onSave={saveNote}
+                  onCancel={() => setEditingNote(null)}
+                  categories={categories}
+                  tags={tags}
+                  onAddCategory={addCategory}
+                  onAddTag={addTag}
+                />
+              )}
+              {showIntegration && (
+                <IntegrationPanel onClose={() => setShowIntegration(false)} />
+              )}
+            </div>
+          )}
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
