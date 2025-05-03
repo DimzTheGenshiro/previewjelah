@@ -1,0 +1,1323 @@
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ebook Mindset Sukses</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .page-flip {
+      perspective: 1500px;
+    }
+    .page {
+      width: 100%;
+      height: 100%;
+      background: white;
+      box-shadow: 0 0 15px rgb(0 0 0 / 0.2);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      position: relative;
+      backface-visibility: hidden;
+      transition: transform 0.8s ease;
+    }
+    .page-content {
+      padding: 1.5rem;
+      height: 100%;
+      overflow-y: auto;
+    }
+    .page-front {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: left;
+      z-index: 2;
+    }
+    .page-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotateY(180deg);
+      transform-origin: right;
+      z-index: 1;
+      background: #f9fafb;
+    }
+    .flipped .page-front {
+      transform: rotateY(-180deg);
+      z-index: 1;
+    }
+    .flipped .page-back {
+      transform: rotateY(0deg);
+      z-index: 2;
+    }
+    /* Scrollbar for notes and content */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #a0aec0;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+        <a href="#" class="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">Ebook Mindset Sukses</a>
+        <nav class="hidden md:flex space-x-6 text-gray-700 dark:text-gray-300 font-medium">
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Mindset</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Kesuksesan</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Kebebasan Finansial</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Quotes</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Lainnya</a>
+        </nav>
+        <button id="mobile-menu-button" aria-label="Toggle menu" class="md:hidden text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded">
+          <i class="fas fa-bars fa-lg"></i>
+        </button>
+      </div>
+      <div id="mobile-menu" class="md:hidden bg-white dark:bg-gray-800 shadow-inner hidden">
+        <nav class="flex flex-col space-y-2 p-4 text-gray-700 dark:text-gray-300 font-medium">
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Mindset</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Kesuksesan</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Kebebasan Finansial</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Quotes</a>
+          <a href="#" class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">Lainnya</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Search and Category -->
+      <section class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-4 md:space-y-0">
+          <div class="flex-grow">
+            <label for="search" class="sr-only">Cari Ebook</label>
+            <input
+              type="text"
+              id="search"
+              placeholder="Cari ebook berdasarkan judul atau kata kunci..."
+              class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100"
+              v-model="searchQuery"
+              @input="filterEbooks"
+              autocomplete="off"
+            />
+          </div>
+          <div class="w-full md:w-64">
+            <label for="category" class="sr-only">Kategori</label>
+            <select
+              id="category"
+              class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-gray-100"
+              v-model="selectedCategory"
+              @change="filterEbooks"
+            >
+              <option value="">Semua Kategori</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ebook List -->
+      <section>
+        <h2 class="text-xl font-semibold mb-4 text-indigo-600 dark:text-indigo-400">Daftar Ebook</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <article
+            v-for="ebook in filteredEbooks"
+            :key="ebook.id"
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition cursor-pointer flex flex-col"
+            @click="openEbook(ebook)"
+            tabindex="0"
+            @keydown.enter="openEbook(ebook)"
+            role="button"
+            :aria-label="'Buka ebook ' + ebook.title"
+          >
+            <img
+              :src="ebook.cover"
+              :alt="'Sampul ebook berjudul ' + ebook.title + ', kategori ' + ebook.category"
+              class="rounded-t-lg object-cover h-48 w-full"
+              loading="lazy"
+            />
+            <div class="p-4 flex flex-col flex-grow">
+              <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{{ ebook.title }}</h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400 flex-grow">{{ ebook.description }}</p>
+              <div class="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                <span>{{ ebook.category }}</span>
+                <span class="flex items-center space-x-1">
+                  <i class="fas fa-star text-yellow-400"></i>
+                  <span>{{ ebook.rating.toFixed(1) }}</span>
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+        <p v-if="filteredEbooks.length === 0" class="mt-6 text-center text-gray-500 dark:text-gray-400">Tidak ada ebook yang ditemukan.</p>
+      </section>
+    </main>
+
+    <!-- Ebook Modal -->
+    <div
+      v-if="showEbook"
+      class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ebook-title"
+    >
+      <div
+        class="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] flex flex-col"
+      >
+        <header class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h3 id="ebook-title" class="text-xl font-semibold text-indigo-600 dark:text-indigo-400 truncate max-w-[80%]">{{ currentEbook.title }}</h3>
+          <button
+            @click="closeEbook"
+            aria-label="Tutup ebook"
+            class="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+          >
+            <i class="fas fa-times fa-lg"></i>
+          </button>
+        </header>
+
+        <div class="flex flex-col md:flex-row flex-grow overflow-hidden">
+          <!-- Left: Ebook Pages -->
+          <section class="flex-grow relative bg-gray-50 dark:bg-gray-800 p-4 flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <button
+                @click="prevPage"
+                :disabled="currentPage === 1"
+                class="px-3 py-1 rounded-md bg-indigo-600 text-white disabled:bg-indigo-300 disabled:cursor-not-allowed hover:bg-indigo-700 transition"
+                aria-label="Halaman sebelumnya"
+              >
+                <i class="fas fa-chevron-left"></i> Sebelumnya
+              </button>
+              <span class="text-sm text-gray-700 dark:text-gray-300">
+                Halaman {{ currentPage }} dari {{ totalPages }}
+              </span>
+              <button
+                @click="nextPage"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-1 rounded-md bg-indigo-600 text-white disabled:bg-indigo-300 disabled:cursor-not-allowed hover:bg-indigo-700 transition"
+                aria-label="Halaman berikutnya"
+              >
+                Berikutnya <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <div
+              class="page-flip flex-grow relative rounded-md shadow-inner bg-white dark:bg-gray-700 overflow-hidden"
+              :class="{ flipped: isFlipped }"
+              tabindex="0"
+              @keydown.left.prevent="prevPage"
+              @keydown.right.prevent="nextPage"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <div class="page page-front">
+                <div class="page-content">
+                  <h4 class="text-lg font-semibold mb-2">{{ currentPageContent.title }}</h4>
+                  <p class="whitespace-pre-line text-gray-800 dark:text-gray-200">{{ currentPageContent.text }}</p>
+                  <img
+                    v-if="currentPageContent.image"
+                    :src="currentPageContent.image"
+                    :alt="currentPageContent.imageAlt"
+                    class="mt-4 rounded-md max-h-48 w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              <div class="page page-back">
+                <div class="page-content">
+                  <h4 class="text-lg font-semibold mb-2">{{ nextPageContent.title }}</h4>
+                  <p class="whitespace-pre-line text-gray-800 dark:text-gray-200">{{ nextPageContent.text }}</p>
+                  <img
+                    v-if="nextPageContent.image"
+                    :src="nextPageContent.image"
+                    :alt="nextPageContent.imageAlt"
+                    class="mt-4 rounded-md max-h-48 w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 flex items-center space-x-3">
+              <button
+                @click="toggleBookmark"
+                :aria-pressed="isBookmarked"
+                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                aria-label="Tandai halaman ini"
+              >
+                <i :class="isBookmarked ? 'fas fa-bookmark' : 'far fa-bookmark'"></i> Bookmark
+              </button>
+              <button
+                @click="toggleNotesPanel"
+                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                aria-expanded="notesOpen.toString()"
+                aria-controls="notes-panel"
+                aria-label="Catatan halaman"
+              >
+                <i class="fas fa-sticky-note"></i> Catatan
+              </button>
+              <button
+                @click="shareEbook"
+                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                aria-label="Bagikan ebook"
+              >
+                <i class="fas fa-share-alt"></i> Bagikan
+              </button>
+              <button
+                @click="toggleLightMode"
+                class="ml-auto text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                aria-label="Toggle mode terang/gelap"
+              >
+                <i :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+              </button>
+              <button
+                @click="toggleMusic"
+                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                aria-label="Play/Pause musik latar"
+              >
+                <i :class="isMusicPlaying ? 'fas fa-music' : 'fas fa-music-slash'"></i>
+              </button>
+            </div>
+
+            <audio ref="audio" :src="currentEbook.music" loop></audio>
+          </section>
+
+          <!-- Right: Notes Panel -->
+          <aside
+            id="notes-panel"
+            v-show="notesOpen"
+            class="w-full md:w-80 bg-gray-100 dark:bg-gray-800 border-l border-gray-300 dark:border-gray-700 p-4 flex flex-col"
+          >
+            <h4 class="text-lg font-semibold mb-2 text-indigo-600 dark:text-indigo-400">Catatan Halaman {{ currentPage }}</h4>
+            <textarea
+              v-model="notes[currentPage]"
+              placeholder="Tulis catatan di sini..."
+              class="flex-grow resize-none rounded-md border border-gray-300 dark:border-gray-600 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              aria-label="Catatan halaman"
+            ></textarea>
+            <button
+              @click="saveNotes"
+              class="mt-3 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              Simpan Catatan
+            </button>
+          </aside>
+        </div>
+
+        <!-- Reviews and Recommendations -->
+        <section class="p-4 border-t border-gray-200 dark:border-gray-700 overflow-y-auto max-h-48 bg-gray-50 dark:bg-gray-900">
+          <h4 class="text-lg font-semibold mb-2 text-indigo-600 dark:text-indigo-400">Ulasan</h4>
+          <div v-if="currentEbook.reviews.length === 0" class="text-gray-600 dark:text-gray-400">Belum ada ulasan.</div>
+          <ul class="space-y-3 max-h-32 overflow-y-auto">
+            <li v-for="(review, index) in currentEbook.reviews" :key="index" class="bg-white dark:bg-gray-800 rounded-md p-3 shadow-sm">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-indigo-600 dark:text-indigo-400">{{ review.user }}</span>
+                <span class="flex items-center space-x-1 text-yellow-400">
+                  <i class="fas fa-star"></i>
+                  <span>{{ review.rating.toFixed(1) }}</span>
+                </span>
+              </div>
+              <p class="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line">{{ review.comment }}</p>
+            </li>
+          </ul>
+          <form @submit.prevent="submitReview" class="mt-3 flex flex-col space-y-2">
+            <label for="review-user" class="sr-only">Nama Pengguna</label>
+            <input
+              id="review-user"
+              v-model="newReview.user"
+              type="text"
+              placeholder="Nama Anda"
+              required
+              class="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <label for="review-rating" class="sr-only">Rating</label>
+            <select
+              id="review-rating"
+              v-model.number="newReview.rating"
+              required
+              class="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option disabled value="">Pilih rating</option>
+              <option v-for="n in 5" :key="n" :value="n">{{ n }} bintang</option>
+            </select>
+            <label for="review-comment" class="sr-only">Komentar</label>
+            <textarea
+              id="review-comment"
+              v-model="newReview.comment"
+              placeholder="Tulis ulasan Anda..."
+              required
+              rows="2"
+              class="rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+            ></textarea>
+            <button
+              type="submit"
+              class="self-end px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              Kirim Ulasan
+            </button>
+          </form>
+        </section>
+
+        <section class="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+          <h4 class="text-lg font-semibold mb-2 text-indigo-600 dark:text-indigo-400">Rekomendasi Ebook</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <article
+              v-for="rec in recommendations"
+              :key="rec.id"
+              class="bg-white dark:bg-gray-800 rounded-md shadow-md cursor-pointer hover:shadow-lg transition flex flex-col"
+              @click="openEbook(rec)"
+              tabindex="0"
+              @keydown.enter="openEbook(rec)"
+              role="button"
+              :aria-label="'Buka ebook ' + rec.title"
+            >
+              <img
+                :src="rec.cover"
+                :alt="'Sampul ebook berjudul ' + rec.title + ', kategori ' + rec.category"
+                class="rounded-t-md object-cover h-32 w-full"
+                loading="lazy"
+              />
+              <div class="p-2 flex flex-col flex-grow">
+                <h5 class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ rec.title }}</h5>
+                <p class="text-xs text-gray-600 dark:text-gray-400 flex-grow truncate">{{ rec.category }}</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted, watch } = Vue;
+
+    createApp({
+      setup() {
+        // Mobile menu toggle
+        const mobileMenuOpen = ref(false);
+        onMounted(() => {
+          const btn = document.getElementById('mobile-menu-button');
+          const menu = document.getElementById('mobile-menu');
+          btn.addEventListener('click', () => {
+            mobileMenuOpen.value = !mobileMenuOpen.value;
+            if (mobileMenuOpen.value) {
+              menu.classList.remove('hidden');
+            } else {
+              menu.classList.add('hidden');
+            }
+          });
+        });
+
+        // Categories
+        const categories = [
+          'Bisnis',
+          'Kesehatan',
+          'Pendidikan',
+          'Pengembangan Diri',
+          'Motivasi',
+          'Teknologi',
+          'Keuangan',
+          'Psikologi',
+        ];
+
+        // Sample ebooks data
+        const ebooks = reactive([
+          {
+            id: 1,
+            title: 'Mindset Positif untuk Kesuksesan',
+            description: 'Pelajari cara membangun mindset positif untuk meraih kesuksesan dalam hidup dan karier.',
+            category: 'Pengembangan Diri',
+            cover: 'https://placehold.co/400x600/png?text=Mindset+Positif+untuk+Kesuksesan',
+            pages: [
+              {
+                title: 'Pendahuluan',
+                text: 'Mindset positif adalah kunci utama untuk membuka pintu kesuksesan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mindset+Positif',
+                imageAlt: 'Ilustrasi seseorang dengan aura positif dan cahaya terang di sekelilingnya',
+              },
+              {
+                title: 'Mengubah Pola Pikir',
+                text: 'Mengubah pola pikir negatif menjadi positif membutuhkan latihan dan kesabaran...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Pola+Pikir',
+                imageAlt: 'Ilustrasi otak dengan roda gigi yang berputar dan cahaya',
+              },
+              {
+                title: 'Manfaat Mindset Positif',
+                text: 'Dengan mindset positif, Anda akan lebih mudah menghadapi tantangan dan mencapai tujuan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Manfaat+Mindset',
+                imageAlt: 'Ilustrasi seseorang yang berhasil mencapai puncak gunung dengan senyum bahagia',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_1a3a3a7a3a.mp3?filename=calm-background-music-10807.mp3',
+            reviews: [
+              {
+                user: 'Andi',
+                rating: 4.5,
+                comment: 'Ebook ini sangat membantu saya untuk mengubah cara berpikir saya.',
+              },
+              {
+                user: 'Sari',
+                rating: 5,
+                comment: 'Bahasanya mudah dipahami dan sangat inspiratif!',
+              },
+            ],
+          },
+          {
+            id: 2,
+            title: 'Rahasia Kesuksesan Finansial',
+            description: 'Strategi dan tips untuk mencapai kebebasan finansial dengan cara yang realistis.',
+            category: 'Keuangan',
+            cover: 'https://placehold.co/400x600/png?text=Rahasia+Kesuksesan+Finansial',
+            pages: [
+              {
+                title: 'Memahami Finansial',
+                text: 'Finansial yang sehat adalah pondasi utama untuk kebebasan finansial...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Finansial',
+                imageAlt: 'Ilustrasi grafik keuangan dan tumpukan uang',
+              },
+              {
+                title: 'Mengelola Pengeluaran',
+                text: 'Pengelolaan pengeluaran yang baik akan membantu Anda menabung lebih banyak...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Pengeluaran',
+                imageAlt: 'Ilustrasi dompet terbuka dengan uang dan catatan pengeluaran',
+              },
+              {
+                title: 'Investasi Cerdas',
+                text: 'Investasi adalah cara terbaik untuk mengembangkan kekayaan Anda secara berkelanjutan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Investasi',
+                imageAlt: 'Ilustrasi grafik naik dan tumpukan koin emas',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_1a2b3c4d5e.mp3?filename=motivational-background-11234.mp3',
+            reviews: [
+              {
+                user: 'Budi',
+                rating: 4,
+                comment: 'Tipsnya sangat praktis dan mudah diterapkan.',
+              },
+              {
+                user: 'Dewi',
+                rating: 4.8,
+                comment: 'Membantu saya mengatur keuangan dengan lebih baik.',
+              },
+            ],
+          },
+          {
+            id: 3,
+            title: 'Kebebasan Finansial untuk Pemula',
+            description: 'Panduan lengkap untuk memulai perjalanan menuju kebebasan finansial.',
+            category: 'Keuangan',
+            cover: 'https://placehold.co/400x600/png?text=Kebebasan+Finansial+untuk+Pemula',
+            pages: [
+              {
+                title: 'Apa itu Kebebasan Finansial?',
+                text: 'Kebebasan finansial berarti Anda memiliki cukup uang untuk hidup tanpa harus bekerja...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Kebebasan+Finansial',
+                imageAlt: 'Ilustrasi seseorang santai di pantai dengan laptop dan uang',
+              },
+              {
+                title: 'Langkah Awal',
+                text: 'Mulailah dengan membuat anggaran dan menabung secara konsisten...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Langkah+Awal',
+                imageAlt: 'Ilustrasi kalender dan catatan keuangan',
+              },
+              {
+                title: 'Membangun Pendapatan Pasif',
+                text: 'Pendapatan pasif adalah kunci untuk mencapai kebebasan finansial...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Pendapatan+Pasif',
+                imageAlt: 'Ilustrasi rumah dan grafik pendapatan pasif',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b3c4d5e6f.mp3?filename=relaxing-background-music-10808.mp3',
+            reviews: [
+              {
+                user: 'Rina',
+                rating: 5,
+                comment: 'Sangat cocok untuk pemula yang ingin belajar keuangan.',
+              },
+              {
+                user: 'Joko',
+                rating: 4.7,
+                comment: 'Panduan yang jelas dan mudah diikuti.',
+              },
+            ],
+          },
+          {
+            id: 4,
+            title: 'Quotes Inspiratif untuk Hidup',
+            description: 'Kumpulan quotes yang memotivasi dan menginspirasi untuk kehidupan sehari-hari.',
+            category: 'Quotes',
+            cover: 'https://placehold.co/400x600/png?text=Quotes+Inspiratif+untuk+Hidup',
+            pages: [
+              {
+                title: 'Motivasi Pagi',
+                text: '"Kesuksesan adalah hasil dari persiapan, kerja keras, dan belajar dari kegagalan."',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Motivasi+Pagi',
+                imageAlt: 'Ilustrasi matahari terbit dengan siluet orang berlari',
+              },
+              {
+                title: 'Ketekunan',
+                text: '"Jangan pernah menyerah, karena kegagalan hanyalah kesuksesan yang tertunda."',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Ketekunan',
+                imageAlt: 'Ilustrasi gunung tinggi dengan bendera di puncak',
+              },
+              {
+                title: 'Percaya Diri',
+                text: '"Percaya pada dirimu sendiri adalah langkah pertama menuju kesuksesan."',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Percaya+Diri',
+                imageAlt: 'Ilustrasi orang berdiri di depan cermin dengan ekspresi percaya diri',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_3c4d5e6f7g.mp3?filename=inspirational-background-11235.mp3',
+            reviews: [
+              {
+                user: 'Lina',
+                rating: 5,
+                comment: 'Quotes-nya sangat menyentuh dan memotivasi saya setiap hari.',
+              },
+              {
+                user: 'Agus',
+                rating: 4.9,
+                comment: 'Sangat bagus untuk meningkatkan semangat hidup.',
+              },
+            ],
+          },
+          {
+            id: 5,
+            title: 'Pengembangan Diri untuk Sukses',
+            description: 'Strategi pengembangan diri yang efektif untuk mencapai kesuksesan pribadi dan profesional.',
+            category: 'Pengembangan Diri',
+            cover: 'https://placehold.co/400x600/png?text=Pengembangan+Diri+untuk+Sukses',
+            pages: [
+              {
+                title: 'Mengenal Diri Sendiri',
+                text: 'Langkah pertama dalam pengembangan diri adalah mengenal kekuatan dan kelemahan Anda...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mengenal+Diri',
+                imageAlt: 'Ilustrasi siluet kepala dengan puzzle yang terpasang',
+              },
+              {
+                title: 'Menetapkan Tujuan',
+                text: 'Tujuan yang jelas akan memandu Anda dalam perjalanan pengembangan diri...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Menetapkan+Tujuan',
+                imageAlt: 'Ilustrasi panah yang menembus target',
+              },
+              {
+                title: 'Meningkatkan Keterampilan',
+                text: 'Terus belajar dan berlatih untuk meningkatkan keterampilan Anda...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Meningkatkan+Keterampilan',
+                imageAlt: 'Ilustrasi tangan memegang buku dan laptop',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_4d5e6f7g8h.mp3?filename=motivational-background-10809.mp3',
+            reviews: [
+              {
+                user: 'Dina',
+                rating: 4.6,
+                comment: 'Banyak insight baru yang saya dapatkan dari ebook ini.',
+              },
+              {
+                user: 'Rizal',
+                rating: 4.8,
+                comment: 'Membantu saya fokus pada pengembangan diri secara konsisten.',
+              },
+            ],
+          },
+          {
+            id: 6,
+            title: 'Motivasi untuk Hidup Lebih Baik',
+            description: 'Cara-cara memotivasi diri agar selalu semangat menjalani hidup dan meraih impian.',
+            category: 'Motivasi',
+            cover: 'https://placehold.co/400x600/png?text=Motivasi+untuk+Hidup+Lebih+Baik',
+            pages: [
+              {
+                title: 'Sumber Motivasi',
+                text: 'Motivasi bisa datang dari dalam diri maupun dari lingkungan sekitar...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Sumber+Motivasi',
+                imageAlt: 'Ilustrasi lampu menyala di tengah kegelapan',
+              },
+              {
+                title: 'Menjaga Semangat',
+                text: 'Tetap semangat meskipun menghadapi rintangan adalah kunci keberhasilan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Menjaga+Semangat',
+                imageAlt: 'Ilustrasi api yang menyala di tengah angin kencang',
+              },
+              {
+                title: 'Mencapai Impian',
+                text: 'Dengan motivasi yang kuat, impian Anda akan menjadi kenyataan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mencapai+Impian',
+                imageAlt: 'Ilustrasi orang melompat dengan latar langit biru dan awan',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_5e6f7g8h9i.mp3?filename=energetic-background-11236.mp3',
+            reviews: [
+              {
+                user: 'Fajar',
+                rating: 5,
+                comment: 'Ebook ini sangat memotivasi saya untuk terus maju.',
+              },
+              {
+                user: 'Maya',
+                rating: 4.7,
+                comment: 'Bahasanya mudah dimengerti dan penuh semangat.',
+              },
+            ],
+          },
+          {
+            id: 7,
+            title: 'Bisnis Sukses dari Nol',
+            description: 'Panduan lengkap memulai bisnis dari nol hingga sukses dan berkembang.',
+            category: 'Bisnis',
+            cover: 'https://placehold.co/400x600/png?text=Bisnis+Sukses+dari+Nol',
+            pages: [
+              {
+                title: 'Memulai Bisnis',
+                text: 'Langkah awal memulai bisnis adalah menentukan ide dan target pasar...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Memulai+Bisnis',
+                imageAlt: 'Ilustrasi orang memegang papan ide bisnis',
+              },
+              {
+                title: 'Strategi Pemasaran',
+                text: 'Pemasaran yang efektif akan membantu bisnis Anda dikenal luas...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Strategi+Pemasaran',
+                imageAlt: 'Ilustrasi grafik naik dan media sosial',
+              },
+              {
+                title: 'Mengelola Keuangan',
+                text: 'Keuangan yang sehat adalah kunci kelangsungan bisnis...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mengelola+Keuangan',
+                imageAlt: 'Ilustrasi kalkulator dan catatan keuangan',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_6f7g8h9i0j.mp3?filename=business-background-10810.mp3',
+            reviews: [
+              {
+                user: 'Hendra',
+                rating: 4.5,
+                comment: 'Panduan yang sangat membantu untuk pemula bisnis.',
+              },
+              {
+                user: 'Sinta',
+                rating: 4.9,
+                comment: 'Ebook ini memberikan wawasan baru tentang bisnis.',
+              },
+            ],
+          },
+          {
+            id: 8,
+            title: 'Kesehatan Mental dan Mindset',
+            description: 'Cara menjaga kesehatan mental dengan mindset yang positif dan sehat.',
+            category: 'Kesehatan',
+            cover: 'https://placehold.co/400x600/png?text=Kesehatan+Mental+dan+Mindset',
+            pages: [
+              {
+                title: 'Pentingnya Kesehatan Mental',
+                text: 'Kesehatan mental adalah bagian penting dari kesejahteraan hidup...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Kesehatan+Mental',
+                imageAlt: 'Ilustrasi otak dengan hati dan simbol kesejahteraan',
+              },
+              {
+                title: 'Mindset Sehat',
+                text: 'Mindset sehat membantu Anda menghadapi stres dan tekanan hidup...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mindset+Sehat',
+                imageAlt: 'Ilustrasi seseorang bermeditasi dengan aura tenang',
+              },
+              {
+                title: 'Tips Menjaga Mental',
+                text: 'Berbagai tips praktis untuk menjaga kesehatan mental sehari-hari...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Tips+Menjaga+Mental',
+                imageAlt: 'Ilustrasi catatan dan tanaman hijau di meja kerja',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_7g8h9i0j1k.mp3?filename=calm-meditation-11237.mp3',
+            reviews: [
+              {
+                user: 'Nina',
+                rating: 4.8,
+                comment: 'Membantu saya memahami pentingnya kesehatan mental.',
+              },
+              {
+                user: 'Rafi',
+                rating: 4.6,
+                comment: 'Tipsnya sangat berguna dan mudah diterapkan.',
+              },
+            ],
+          },
+          {
+            id: 9,
+            title: 'Pendidikan dan Mindset Sukses',
+            description: 'Menghubungkan pendidikan dengan mindset untuk mencapai kesuksesan.',
+            category: 'Pendidikan',
+            cover: 'https://placehold.co/400x600/png?text=Pendidikan+dan+Mindset+Sukses',
+            pages: [
+              {
+                title: 'Peran Pendidikan',
+                text: 'Pendidikan adalah fondasi penting dalam membentuk mindset sukses...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Peran+Pendidikan',
+                imageAlt: 'Ilustrasi buku terbuka dengan cahaya keluar',
+              },
+              {
+                title: 'Mindset Pembelajar',
+                text: 'Mindset pembelajar membantu Anda terus berkembang dan beradaptasi...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mindset+Pembelajar',
+                imageAlt: 'Ilustrasi anak muda membaca buku dengan fokus',
+              },
+              {
+                title: 'Menerapkan Pendidikan',
+                text: 'Cara menerapkan ilmu pendidikan untuk mencapai tujuan hidup...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Menerapkan+Pendidikan',
+                imageAlt: 'Ilustrasi orang menulis di papan tulis dengan ide-ide kreatif',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8h9i0j1k2l.mp3?filename=study-background-10811.mp3',
+            reviews: [
+              {
+                user: 'Tina',
+                rating: 4.7,
+                comment: 'Ebook ini menginspirasi saya untuk terus belajar.',
+              },
+              {
+                user: 'Eko',
+                rating: 4.5,
+                comment: 'Sangat relevan dengan dunia pendidikan saat ini.',
+              },
+            ],
+          },
+          {
+            id: 10,
+            title: 'Teknologi dan Kesuksesan',
+            description: 'Bagaimana teknologi dapat membantu Anda mencapai kesuksesan lebih cepat.',
+            category: 'Teknologi',
+            cover: 'https://placehold.co/400x600/png?text=Teknologi+dan+Kesuksesan',
+            pages: [
+              {
+                title: 'Peran Teknologi',
+                text: 'Teknologi mempermudah berbagai aspek kehidupan dan bisnis...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Peran+Teknologi',
+                imageAlt: 'Ilustrasi perangkat digital dan jaringan koneksi',
+              },
+              {
+                title: 'Memanfaatkan Teknologi',
+                text: 'Cara memanfaatkan teknologi untuk meningkatkan produktivitas...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Memanfaatkan+Teknologi',
+                imageAlt: 'Ilustrasi orang menggunakan laptop dan smartphone',
+              },
+              {
+                title: 'Inovasi dan Kreativitas',
+                text: 'Inovasi teknologi membuka peluang baru untuk kesuksesan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Inovasi+dan+Kreativitas',
+                imageAlt: 'Ilustrasi bola lampu menyala dengan gear dan ide kreatif',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_9i0j1k2l3m.mp3?filename=tech-background-11238.mp3',
+            reviews: [
+              {
+                user: 'Rina',
+                rating: 4.9,
+                comment: 'Membantu saya memahami pentingnya teknologi dalam bisnis.',
+              },
+              {
+                user: 'Dedi',
+                rating: 4.6,
+                comment: 'Ebook yang sangat informatif dan up-to-date.',
+              },
+            ],
+          },
+          {
+            id: 11,
+            title: 'Motivasi Kerja dan Produktivitas',
+            description: 'Tips dan trik untuk meningkatkan motivasi kerja dan produktivitas harian.',
+            category: 'Motivasi',
+            cover: 'https://placehold.co/400x600/png?text=Motivasi+Kerja+dan+Produktivitas',
+            pages: [
+              {
+                title: 'Menemukan Motivasi',
+                text: 'Motivasi adalah bahan bakar untuk produktivitas yang tinggi...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Menemukan+Motivasi',
+                imageAlt: 'Ilustrasi orang bersemangat dengan latar kantor modern',
+              },
+              {
+                title: 'Mengatur Waktu',
+                text: 'Manajemen waktu yang baik membantu Anda bekerja lebih efektif...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mengatur+Waktu',
+                imageAlt: 'Ilustrasi jam dinding dan kalender kerja',
+              },
+              {
+                title: 'Mengatasi Prokrastinasi',
+                text: 'Cara mengatasi kebiasaan menunda pekerjaan agar lebih produktif...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mengatasi+Prokrastinasi',
+                imageAlt: 'Ilustrasi orang memecahkan rantai yang mengikat',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_0j1k2l3m4n.mp3?filename=energetic-work-10812.mp3',
+            reviews: [
+              {
+                user: 'Sari',
+                rating: 4.7,
+                comment: 'Banyak tips yang bisa langsung saya praktekkan.',
+              },
+              {
+                user: 'Andi',
+                rating: 4.8,
+                comment: 'Meningkatkan semangat kerja saya setiap hari.',
+              },
+            ],
+          },
+          {
+            id: 12,
+            title: 'Pengembangan Diri untuk Pemimpin',
+            description: 'Keterampilan dan mindset yang harus dimiliki oleh seorang pemimpin sukses.',
+            category: 'Pengembangan Diri',
+            cover: 'https://placehold.co/400x600/png?text=Pengembangan+Diri+untuk+Pemimpin',
+            pages: [
+              {
+                title: 'Karakter Pemimpin',
+                text: 'Pemimpin sukses memiliki karakter yang kuat dan visioner...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Karakter+Pemimpin',
+                imageAlt: 'Ilustrasi sosok pemimpin berdiri di depan tim',
+              },
+              {
+                title: 'Komunikasi Efektif',
+                text: 'Komunikasi yang baik adalah kunci keberhasilan kepemimpinan...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Komunikasi+Efektif',
+                imageAlt: 'Ilustrasi dua orang berdiskusi dengan ekspresi serius',
+              },
+              {
+                title: 'Menginspirasi Tim',
+                text: 'Pemimpin harus mampu menginspirasi dan memotivasi timnya...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Menginspirasi+Tim',
+                imageAlt: 'Ilustrasi pemimpin memberikan pidato di depan tim',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_1k2l3m4n5o.mp3?filename=leadership-background-11239.mp3',
+            reviews: [
+              {
+                user: 'Rizal',
+                rating: 4.9,
+                comment: 'Ebook ini sangat membantu saya menjadi pemimpin yang lebih baik.',
+              },
+              {
+                user: 'Dina',
+                rating: 4.7,
+                comment: 'Isi yang lengkap dan mudah dipahami.',
+              },
+            ],
+          },
+          {
+            id: 13,
+            title: 'Mindset Kreatif untuk Inovasi',
+            description: 'Mengembangkan mindset kreatif untuk menciptakan inovasi yang berdampak.',
+            category: 'Pengembangan Diri',
+            cover: 'https://placehold.co/400x600/png?text=Mindset+Kreatif+untuk+Inovasi',
+            pages: [
+              {
+                title: 'Apa itu Mindset Kreatif?',
+                text: 'Mindset kreatif adalah cara berpikir yang terbuka dan inovatif...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mindset+Kreatif',
+                imageAlt: 'Ilustrasi otak dengan lampu ide menyala',
+              },
+              {
+                title: 'Mengasah Kreativitas',
+                text: 'Latihan dan kebiasaan yang dapat meningkatkan kreativitas Anda...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mengasah+Kreativitas',
+                imageAlt: 'Ilustrasi tangan menggambar sketsa ide',
+              },
+              {
+                title: 'Menerapkan Inovasi',
+                text: 'Cara menerapkan ide kreatif menjadi inovasi yang nyata...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Menerapkan+Inovasi',
+                imageAlt: 'Ilustrasi produk inovatif dengan cahaya dan efek modern',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_2l3m4n5o6p.mp3?filename=creative-background-10813.mp3',
+            reviews: [
+              {
+                user: 'Maya',
+                rating: 4.8,
+                comment: 'Membantu saya berpikir lebih kreatif dalam pekerjaan.',
+              },
+              {
+                user: 'Fajar',
+                rating: 4.6,
+                comment: 'Ebook yang sangat inspiratif dan penuh ide baru.',
+              },
+            ],
+          },
+          {
+            id: 14,
+            title: 'Motivasi dan Mindset untuk Pelajar',
+            description: 'Membangun motivasi dan mindset positif untuk pelajar agar sukses akademik.',
+            category: 'Pendidikan',
+            cover: 'https://placehold.co/400x600/png?text=Motivasi+dan+Mindset+untuk+Pelajar',
+            pages: [
+              {
+                title: 'Motivasi Belajar',
+                text: 'Motivasi yang kuat akan membantu pelajar mencapai hasil terbaik...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Motivasi+Belajar',
+                imageAlt: 'Ilustrasi pelajar dengan buku dan ekspresi semangat',
+              },
+              {
+                title: 'Mindset Positif',
+                text: 'Mindset positif membantu pelajar menghadapi tantangan akademik...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Mindset+Positif',
+                imageAlt: 'Ilustrasi otak dengan simbol positif dan energi',
+              },
+              {
+                title: 'Strategi Sukses',
+                text: 'Strategi belajar efektif untuk meningkatkan prestasi akademik...',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Strategi+Sukses',
+                imageAlt: 'Ilustrasi catatan belajar dan jam alarm',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2021/10/22/audio_3m4n5o6p7q.mp3?filename=study-motivation-11240.mp3',
+            reviews: [
+              {
+                user: 'Lina',
+                rating: 5,
+                comment: 'Ebook ini sangat membantu saya tetap termotivasi belajar.',
+              },
+              {
+                user: 'Joko',
+                rating: 4.7,
+                comment: 'Isi yang mudah dipahami dan aplikatif.',
+              },
+            ],
+          },
+          {
+            id: 15,
+            title: 'Quotes Motivasi Harian',
+            description: 'Kumpulan quotes motivasi yang bisa Anda baca setiap hari untuk semangat.',
+            category: 'Quotes',
+            cover: 'https://placehold.co/400x600/png?text=Quotes+Motivasi+Harian',
+            pages: [
+              {
+                title: 'Quotes 1',
+                text: '"Jangan berhenti ketika lelah, berhentilah ketika selesai."',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Quotes+1',
+                imageAlt: 'Ilustrasi orang berlari di jalan panjang dengan matahari terbenam',
+              },
+              {
+                title: 'Quotes 2',
+                text: '"Kesuksesan adalah hasil dari kerja keras dan ketekunan."',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Quotes+2',
+                imageAlt: 'Ilustrasi tangga menuju puncak gunung dengan bendera',
+              },
+              {
+                title: 'Quotes 3',
+                text: '"Percaya pada diri sendiri adalah awal dari segala pencapaian."',
+                image: 'https://placehold.co/600x300/png?text=Ilustrasi+Quotes+3',
+                imageAlt: 'Ilustrasi orang berdiri di depan cermin dengan ekspresi percaya diri',
+              },
+            ],
+            music: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_4n5o6p7q8r.mp3?filename=motivational-quotes-10814.mp3',
+            reviews: [
+              {
+                user: 'Agus',
+                rating: 5,
+                comment: 'Quotes-nya sangat menginspirasi saya setiap hari.',
+              },
+              {
+                user: 'Maya',
+                rating: 4.9,
+                comment: 'Sangat cocok untuk memulai hari dengan semangat.',
+              },
+            ],
+          },
+        ]);
+
+        // Search and filter
+        const searchQuery = ref('');
+        const selectedCategory = ref('');
+        const filteredEbooks = ref([...ebooks]);
+
+        function filterEbooks() {
+          const query = searchQuery.value.toLowerCase().trim();
+          const category = selectedCategory.value;
+          filteredEbooks.value = ebooks.filter((ebook) => {
+            const matchesQuery =
+              ebook.title.toLowerCase().includes(query) ||
+              ebook.description.toLowerCase().includes(query);
+            const matchesCategory = category ? ebook.category === category : true;
+            return matchesQuery && matchesCategory;
+          });
+        }
+
+        // Ebook modal state
+        const showEbook = ref(false);
+        const currentEbook = reactive({
+          id: null,
+          title: '',
+          description: '',
+          category: '',
+          cover: '',
+          pages: [],
+          music: '',
+          reviews: [],
+        });
+        const currentPage = ref(1);
+        const totalPages = computed(() => currentEbook.pages.length);
+        const isFlipped = ref(false);
+        const notesOpen = ref(false);
+        const notes = reactive({});
+        const isBookmarked = ref(false);
+        const isDarkMode = ref(false);
+        const isMusicPlaying = ref(false);
+        const newReview = reactive({
+          user: '',
+          rating: null,
+          comment: '',
+        });
+
+        // Computed current page content and next page content for flip effect
+        const currentPageContent = computed(() => {
+          return currentEbook.pages[currentPage.value - 1] || {};
+        });
+        const nextPageContent = computed(() => {
+          return currentEbook.pages[currentPage.value] || {};
+        });
+
+        // Open ebook modal and load data
+        function openEbook(ebook) {
+          Object.assign(currentEbook, ebook);
+          currentPage.value = 1;
+          notesOpen.value = false;
+          isBookmarked.value = checkBookmark(ebook.id, currentPage.value);
+          isMusicPlaying.value = false;
+          isFlipped.value = false;
+          loadNotes(ebook.id);
+          showEbook.value = true;
+          // Set dark mode from localStorage or default
+          isDarkMode.value = localStorage.getItem('darkMode') === 'true';
+          applyDarkMode();
+          // Pause any playing audio first
+          pauseAudio();
+        }
+
+        // Close ebook modal
+        function closeEbook() {
+          showEbook.value = false;
+          pauseAudio();
+          notesOpen.value = false;
+          notes.value = {};
+          newReview.user = '';
+          newReview.rating = null;
+          newReview.comment = '';
+        }
+
+        // Page navigation with flip animation
+        function nextPage() {
+          if (currentPage.value < totalPages.value) {
+            isFlipped.value = true;
+            setTimeout(() => {
+              currentPage.value++;
+              isBookmarked.value = checkBookmark(currentEbook.id, currentPage.value);
+              isFlipped.value = false;
+              loadNotes(currentEbook.id);
+            }, 400);
+          }
+        }
+        function prevPage() {
+          if (currentPage.value > 1) {
+            isFlipped.value = true;
+            setTimeout(() => {
+              currentPage.value--;
+              isBookmarked.value = checkBookmark(currentEbook.id, currentPage.value);
+              isFlipped.value = false;
+              loadNotes(currentEbook.id);
+            }, 400);
+          }
+        }
+
+        // Bookmark management (stored in localStorage)
+        function bookmarkKey(ebookId, page) {
+          return `bookmark_${ebookId}_page_${page}`;
+        }
+        function toggleBookmark() {
+          const key = bookmarkKey(currentEbook.id, currentPage.value);
+          if (isBookmarked.value) {
+            localStorage.removeItem(key);
+            isBookmarked.value = false;
+          } else {
+            localStorage.setItem(key, 'true');
+            isBookmarked.value = true;
+          }
+        }
+        function checkBookmark(ebookId, page) {
+          return localStorage.getItem(bookmarkKey(ebookId, page)) === 'true';
+        }
+
+        // Notes management (stored in localStorage)
+        function notesKey(ebookId) {
+          return `notes_${ebookId}`;
+        }
+        function loadNotes(ebookId) {
+          const saved = localStorage.getItem(notesKey(ebookId));
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            for (const key in notes) {
+              delete notes[key];
+            }
+            Object.assign(notes, parsed);
+          } else {
+            for (const key in notes) {
+              delete notes[key];
+            }
+          }
+        }
+        function saveNotes() {
+          localStorage.setItem(notesKey(currentEbook.id), JSON.stringify(notes));
+          alert('Catatan berhasil disimpan.');
+        }
+        function toggleNotesPanel() {
+          notesOpen.value = !notesOpen.value;
+        }
+
+        // Light/Dark mode toggle
+        function applyDarkMode() {
+          if (isDarkMode.value) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          localStorage.setItem('darkMode', isDarkMode.value.toString());
+        }
+        function toggleLightMode() {
+          isDarkMode.value = !isDarkMode.value;
+          applyDarkMode();
+        }
+
+        // Music play/pause
+        const audio = ref(null);
+        onMounted(() => {
+          audio.value = document.querySelector('audio');
+        });
+        function toggleMusic() {
+          if (!audio.value) return;
+          if (isMusicPlaying.value) {
+            audio.value.pause();
+            isMusicPlaying.value = false;
+          } else {
+            audio.value.play();
+            isMusicPlaying.value = true;
+          }
+        }
+        function pauseAudio() {
+          if (audio.value) {
+            audio.value.pause();
+            isMusicPlaying.value = false;
+          }
+        }
+
+        // Share ebook (using Web Share API if available)
+        function shareEbook() {
+          const shareData = {
+            title: currentEbook.title,
+            text: `Baca ebook "${currentEbook.title}" di Ebook Mindset Sukses.`,
+            url: window.location.href,
+          };
+          if (navigator.share) {
+            navigator.share(shareData).catch(() => {
+              alert('Gagal membagikan ebook.');
+            });
+          } else {
+            // fallback: copy url to clipboard
+            navigator.clipboard.writeText(shareData.url).then(() => {
+              alert('Link ebook disalin ke clipboard.');
+            });
+          }
+        }
+
+        // Submit review
+        function submitReview() {
+          if (
+            newReview.user.trim() === '' ||
+            !newReview.rating ||
+            newReview.comment.trim() === ''
+          ) {
+            alert('Mohon lengkapi semua kolom ulasan.');
+            return;
+          }
+          currentEbook.reviews.push({
+            user: newReview.user.trim(),
+            rating: newReview.rating,
+            comment: newReview.comment.trim(),
+          });
+          // Reset form
+          newReview.user = '';
+          newReview.rating = null;
+          newReview.comment = '';
+          alert('Terima kasih atas ulasan Anda!');
+        }
+
+        // Recommendations based on current ebook category
+        const recommendations = computed(() => {
+          if (!currentEbook.id) return [];
+          return ebooks
+            .filter(
+              (e) =>
+                e.category === currentEbook.category && e.id !== currentEbook.id
+            )
+            .slice(0, 6);
+        });
+
+        // Watch for changes in currentPage to update bookmark and notes
+        watch(currentPage, (newPage) => {
+          isBookmarked.value = checkBookmark(currentEbook.id, newPage);
+          loadNotes(currentEbook.id);
+        });
+
+        return {
+          categories,
+          ebooks,
+          searchQuery,
+          selectedCategory,
+          filteredEbooks,
+          filterEbooks,
+          showEbook,
+          currentEbook,
+          currentPage,
+          totalPages,
+          currentPageContent,
+          nextPageContent,
+          isFlipped,
+          notesOpen,
+          notes,
+          isBookmarked,
+          toggleBookmark,
+          toggleNotesPanel,
+          saveNotes,
+          openEbook,
+          closeEbook,
+          nextPage,
+          prevPage,
+          isDarkMode,
+          toggleLightMode,
+          isMusicPlaying,
+          toggleMusic,
+          shareEbook,
+          newReview,
+          submitReview,
+          recommendations,
+        };
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>
